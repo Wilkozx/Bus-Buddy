@@ -37,9 +37,9 @@ function App() {
                 iconAnchor: [25, 25],
                 popupAnchor: [0, -25],
               });
-              L.marker([buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude'], buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']], {icon: bus_div_icon}).addTo(busLayer).bindPopup(`Bus ${buses[i]['MonitoredVehicleJourney']['PublishedLineName']} bearing ${buses[i]['MonitoredVehicleJourney']['Bearing']} degrees. longitude: ${buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']} latitude: ${buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude']}`);
+              L.marker([buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude'], buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']], {icon: bus_div_icon}).addTo(busLayer).bindPopup(`Bus ${buses[i]['MonitoredVehicleJourney']['PublishedLineName']} bearing ${buses[i]['MonitoredVehicleJourney']['Bearing']} degrees. longitude: ${buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']} latitude: ${buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude']}, destination ${buses[i]['MonitoredVehicleJourney']['DestinationName']}`);
             }
-          busLayer.addTo(map);
+        busLayer.addTo(map);
       }
       catch (error) {
         console.error(error);
