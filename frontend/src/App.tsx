@@ -23,7 +23,6 @@ function App() {
 
     const fetchData = async () => {
       try {
-        busLayer.clearLayers();
         const API_URL = "http://172.26.30.1:5000" || "http://localhost:5000";
         const response = await axios.get(`${API_URL}/api/data`);
         buses =
@@ -32,6 +31,7 @@ function App() {
           ];
 
         // TODO: add a expiry timer for buses that constantly return undefined for their bearing ( means they offline 90$ of the time) ~ 10 min / chance they are just waiting at bus station
+        busLayer.clearLayers();
         for (let i = 0; i < buses.length; i++) {
           console.log(buses[i]);
           if (buses[i]["MonitoredVehicleJourney"]["Bearing"] === undefined) {
@@ -47,16 +47,11 @@ function App() {
           let line = buses[i]["MonitoredVehicleJourney"]["PublishedLineName"];
           let company = buses[i]["MonitoredVehicleJourney"]["OperatorRef"];
 
-          let imagePath;
-          Math.random() > 0.5
-            ? (imagePath = "arriva.png")
-            : (imagePath = "bus.png");
-
           let bus_div_icon = L.divIcon({
             className: "bus-icon",
             html:
               "<img src=" +
-              imagePath +
+              "arriva.png" +
               ' width="50" height="50" style="transform: rotate(' +
               (bearing - 90) +
               'deg);">',
@@ -79,8 +74,7 @@ function App() {
 
           L.marker([latitude, longitude], { icon: bus_div_icon })
             .addTo(busLayer)
-            .bindPopup(popup)
-            .bindTooltip(line);
+            .bindPopup(popup);
         }
         busLayer.addTo(map);
       } catch (error) {
