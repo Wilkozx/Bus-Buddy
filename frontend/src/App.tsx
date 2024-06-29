@@ -24,7 +24,12 @@ function App() {
         const response = await axios.get(`http://localhost:5000/api/data/29`);
         buses = (response.data['Siri']['ServiceDelivery']['VehicleMonitoringDelivery']['VehicleActivity']);
     
+        // TODO: add a expiry timer for buses that constantly return undefined for their bearing ( means they offline 90$ of the time) ~ 10 min / chance they are just waiting at bus station
         for (let i = 0; i < buses.length; i++) {
+          console.log(buses[i]);
+          if (buses[i]['MonitoredVehicleJourney']['Bearing'] === undefined) {
+            continue;
+          }
               let bus_div_icon = L.divIcon({
                 className: 'bus-icon',
                 html: '<img src="bus.png" width="50" height="50" style="transform: rotate('+ (buses[i]['MonitoredVehicleJourney']["Bearing"]-90) +'deg);">',
@@ -32,7 +37,7 @@ function App() {
                 iconAnchor: [25, 25],
                 popupAnchor: [0, -25],
               });
-              L.marker([buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude'], buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']], {icon: bus_div_icon}).addTo(busLayer).bindPopup(`Bus ${buses[i]['MonitoredVehicleJourney']['PublishedLineName']} bearing ${buses[i]['MonitoredVehicleJourney']['Bearing']} degrees.`);
+              L.marker([buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude'], buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']], {icon: bus_div_icon}).addTo(busLayer).bindPopup(`Bus ${buses[i]['MonitoredVehicleJourney']['PublishedLineName']} bearing ${buses[i]['MonitoredVehicleJourney']['Bearing']} degrees. longitude: ${buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Longitude']} latitude: ${buses[i]['MonitoredVehicleJourney']['VehicleLocation']['Latitude']}`);
             }
           busLayer.addTo(map);
       }
