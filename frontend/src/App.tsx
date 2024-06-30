@@ -25,27 +25,21 @@ function App() {
       try {
         const API_URL = "http://172.26.30.1:5000" || "http://localhost:5000";
         const response = await axios.get(`${API_URL}/api/data`);
-        buses =
-          response.data["Siri"]["ServiceDelivery"]["VehicleMonitoringDelivery"][
-            "VehicleActivity"
-          ];
+        buses = response.data;
 
         // TODO: add a expiry timer for buses that constantly return undefined for their bearing ( means they offline 90$ of the time) ~ 10 min / chance they are just waiting at bus station
         busLayer.clearLayers();
         for (let i = 0; i < buses.length; i++) {
           console.log(buses[i]);
-          if (buses[i]["MonitoredVehicleJourney"]["Bearing"] === undefined) {
+          if (buses[i]["bearing"] === null) {
             continue;
           }
-          let latitude =
-            buses[i]["MonitoredVehicleJourney"]["VehicleLocation"]["Latitude"];
-          let longitude =
-            buses[i]["MonitoredVehicleJourney"]["VehicleLocation"]["Longitude"];
-          let bearing = buses[i]["MonitoredVehicleJourney"]["Bearing"];
-          let destination =
-            buses[i]["MonitoredVehicleJourney"]["DestinationName"];
-          let line = buses[i]["MonitoredVehicleJourney"]["PublishedLineName"];
-          let company = buses[i]["MonitoredVehicleJourney"]["OperatorRef"];
+          let latitude = buses[i]["latitude"];
+          let longitude = buses[i]["longitude"];
+          let bearing = buses[i]["bearing"];
+          let destination = buses[i]["destination_name"];
+          let line = buses[i]["published_line_name"];
+          let company = buses[i]["operator_ref"];
 
           let bus_div_icon = L.divIcon({
             className: "bus-icon",

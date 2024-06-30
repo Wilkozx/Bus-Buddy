@@ -1,4 +1,14 @@
 services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   backend:
     build:
@@ -9,6 +19,8 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app
+    depends_on:
+      - db
 
   frontend:
     build:
@@ -20,3 +32,5 @@ services:
       - ./frontend:/app
       - ./frontend:/node_modules
 
+volumes:
+  postgres_data:
