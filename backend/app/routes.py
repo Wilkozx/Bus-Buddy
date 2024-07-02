@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 import os
 from dotenv import load_dotenv
 import requests
@@ -21,8 +21,15 @@ def setup_routes(app, db):
 
     @main.route("/api/data", methods=["GET"])
     def get_test_data():
-        result = db.execute_query("SELECT * FROM buses")
+        latitude = request.args.get("latitude")
+        latitude2 = request.args.get("latitude2")
+        longitude = request.args.get("longitude")
+        longitude2 = request.args.get("longitude2")
 
+        result = db.execute_query(
+            "SELECT * FROM buses WHERE latitude BETWEEN %s AND %s AND longitude BETWEEN %s AND %s",
+            (latitude2, latitude, longitude2, longitude),
+        )
         formatted_result = []
         for row in result:
             bus_data = {

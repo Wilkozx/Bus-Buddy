@@ -10,7 +10,7 @@ function App() {
   useEffect(() => {
     const map = L.map("map").setView(
       [52.651133231174704, -1.2406078784788304],
-      11
+      12
     );
     const busLayer = L.layerGroup();
     let buses = [];
@@ -24,13 +24,22 @@ function App() {
     const fetchData = async () => {
       try {
         const API_URL = "http://172.26.30.1:5000" || "http://localhost:5000";
-        const response = await axios.get(`${API_URL}/api/data`);
+        const response = await axios.get(
+          `${API_URL}/api/data?` +
+            "latitude=" +
+            map.getBounds().getNorthEast().lat +
+            "&longitude=" +
+            map.getBounds().getNorthEast().lng +
+            "&latitude2=" +
+            map.getBounds().getSouthWest().lat +
+            "&longitude2=" +
+            map.getBounds().getSouthWest().lng
+        );
         buses = response.data;
 
         // TODO: add a expiry timer for buses that constantly return undefined for their bearing ( means they offline 90$ of the time) ~ 10 min / chance they are just waiting at bus station
         busLayer.clearLayers();
         for (let i = 0; i < buses.length; i++) {
-          console.log(buses[i]);
           if (buses[i]["bearing"] === null) {
             continue;
           }
@@ -48,7 +57,6 @@ function App() {
               "arriva.png" +
               ' width="50" height="50" style="transform: rotate(' +
               (bearing - 90) +
-              'deg);">',
             iconSize: [50, 50],
             iconAnchor: [25, 25],
             popupAnchor: [0, -25],
@@ -79,7 +87,7 @@ function App() {
     fetchData();
     const interval = setInterval(() => {
       fetchData();
-    }, 15000);
+    }, 5000);
 
     return () => {
       clearInterval(interval);
