@@ -19,7 +19,7 @@ def populate_database(db):
     api_key = os.getenv("API_KEY")
     try:
         logger.info("Retrieving data...")
-        url = "https://data.bus-data.dft.gov.uk/api/v1/datafeed/?boundingBox=-3.339817814839705,53.51651349319478,1.461207485354471,51.16802271054219&api_key=" + api_key
+        url = "https://data.bus-data.dft.gov.uk/api/v1/datafeed/?boundingBox=-13.865213794609623,59.065758757501534,2.741947697247088,50.18291484670497&api_key=" + api_key
         try:
             xml_response = requests.get(url)
         except Exception as e:

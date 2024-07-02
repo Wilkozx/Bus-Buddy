@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { useState } from "react";
-import { useRef } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -12,9 +10,9 @@ function App() {
       [52.651133231174704, -1.2406078784788304],
       12
     );
+
     const busLayer = L.layerGroup();
     let buses = [];
-
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution:
@@ -43,6 +41,7 @@ function App() {
           if (buses[i]["bearing"] === null) {
             continue;
           }
+
           let latitude = buses[i]["latitude"];
           let longitude = buses[i]["longitude"];
           let bearing = buses[i]["bearing"];
