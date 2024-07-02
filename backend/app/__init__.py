@@ -16,17 +16,15 @@ def create_app():
     CORS(app)
 
     db = DatabaseConnection()
-    setup_database(db)
     setup_routes(app, db)
 
     logger.getLogger(__name__)
     logger.basicConfig(level=logger.INFO)
 
-    logger.info("Starting scheduler")
-
     def populate_database_wrapper():
         populate_database(db)
 
+    logger.info("Starting scheduler")
     scheduler.add_job(func=populate_database_wrapper,
                       trigger="interval", seconds=15)
     scheduler.start()
