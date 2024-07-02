@@ -57,6 +57,7 @@ function App() {
               "arriva.png" +
               ' width="50" height="50" style="transform: rotate(' +
               (bearing - 90) +
+              'deg); ">',
             iconSize: [50, 50],
             iconAnchor: [25, 25],
             popupAnchor: [0, -25],
