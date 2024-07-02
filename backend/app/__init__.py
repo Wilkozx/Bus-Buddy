@@ -16,8 +16,8 @@ def create_app():
     CORS(app)
 
     db = DatabaseConnection()
-    setup_routes(app, db)
     setup_database(db)
+    setup_routes(app, db)
 
     logger.getLogger(__name__)
     logger.basicConfig(level=logger.INFO)
