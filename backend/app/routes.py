@@ -21,15 +21,44 @@ def setup_routes(app, db):
 
     @main.route("/api/data", methods=["GET"])
     def get_test_data():
+        if (request.args == {}):
+            result = db.execute_query("SELECT * FROM buses")
+            formatted_result = []
+            for row in result:
+                bus_data = {
+                    "id": row[0],
+                    "vehicle_unique_id": row[1],
+                    "block_ref": row[2],
+                    "destination_aimed_arrival_time": row[3],
+                    "destination_name": row[4],
+                    "destination_ref": row[5],
+                    "direction_ref": row[6],
+                    "line_ref": row[7],
+                    "operator_ref": row[8],
+                    "origin_aimed_depature_time": row[9],
+                    "origin_name": row[10],
+                    "origin_ref": row[11],
+                    "published_line_name": row[12],
+                    "bearing": row[13],
+                    "latitude": row[14],
+                    "longitude": row[15],
+                    "recorded_at_time": row[16],
+                    "valid_until_time": row[17],
+                    "inserted_at_time": row[18],
+                    "updated_at_time": row[19],
+                }
+                formatted_result.append(bus_data)
+            return jsonify(formatted_result)
+
         latitude = request.args.get("latitude")
         latitude2 = request.args.get("latitude2")
         longitude = request.args.get("longitude")
         longitude2 = request.args.get("longitude2")
-
         result = db.execute_query(
             "SELECT * FROM buses WHERE latitude BETWEEN %s AND %s AND longitude BETWEEN %s AND %s",
             (latitude2, latitude, longitude2, longitude),
         )
+
         formatted_result = []
         for row in result:
             bus_data = {
