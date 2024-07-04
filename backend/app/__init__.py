@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_socketio import SocketIO
 
 from db.database_connection import DatabaseConnection
 from db.database_utils import setup_database, populate_database
@@ -13,6 +14,8 @@ scheduler = BackgroundScheduler()
 
 def create_app():
     app = Flask(__name__)
+    server = SocketIO(app, cors_allowed_origins="*")
+
     CORS(app)
 
     db = DatabaseConnection()
@@ -22,7 +25,7 @@ def create_app():
     logger.basicConfig(level=logger.INFO)
 
     def populate_database_wrapper():
-        populate_database(db)
+        populate_database(db, server)
 
     logger.info("Starting scheduler")
     scheduler.add_job(func=populate_database_wrapper,
