@@ -7,13 +7,15 @@ from dotenv import load_dotenv
 from db.database_connection import DatabaseConnection
 import logging as logger
 
+from flask_socketio import SocketIO
+
 
 def setup_database(db):
     # function for later use with getting datasets to populate the database everyday at 06:00 or on startup.
     return
 
 
-def populate_database(db):
+def populate_database(db, server):
     logger.getLogger(__name__)
     load_dotenv()
     api_key = os.getenv("API_KEY")
@@ -57,3 +59,8 @@ def populate_database(db):
         logger.error("Unable to populate database" + str(e))
     finally:
         logger.info("Database populated")
+        try:
+            logger.info("Notifying clients of update...")
+            server.emit("update_buses")
+        except Exception as e:
+            logger.error("Unable to notify clients" + str(e))
