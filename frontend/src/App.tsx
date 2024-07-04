@@ -3,94 +3,128 @@ import axios from "axios";
 import "./App.css";
 
 import * as L from "leaflet";
+import { io } from "socket.io-client";
 
 function App() {
   useEffect(() => {
-    const map = L.map("map").setView(
-      [52.651133231174704, -1.2406078784788304],
-      12
-    );
-
-    const busLayer = L.layerGroup();
-    let buses = [];
+    const map = L.map("map", {
+      preferCanvas: true,
+    }).setView([52.645813588435104, -1.2753865644869717], 12);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution:
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
 
+    const busLayer = L.layerGroup();
+
+    const URL = "http://localhost:5000";
+    const socket = io(URL);
+
+    socket.on("connect", () => {
+      console.log("Connected to server");
+    });
+
+    let buses: any[] = [];
     const fetchData = async () => {
       try {
         const API_URL = "http://172.26.30.1:5000" || "http://localhost:5000";
         const response = await axios.get(
           `${API_URL}/api/data?` +
             "latitude=" +
-            map.getBounds().getNorthEast().lat +
-            "&longitude=" +
-            map.getBounds().getNorthEast().lng +
-            "&latitude2=" +
             map.getBounds().getSouthWest().lat +
+            "&longitude=" +
+            map.getBounds().getSouthWest().lng +
+            "&latitude2=" +
+            map.getBounds().getNorthEast().lat +
             "&longitude2=" +
-            map.getBounds().getSouthWest().lng
+            map.getBounds().getNorthEast().lng
         );
         buses = response.data;
-
-        // TODO: add a expiry timer for buses that constantly return undefined for their bearing ( means they offline 90$ of the time) ~ 10 min / chance they are just waiting at bus station
-        busLayer.clearLayers();
-        for (let i = 0; i < buses.length; i++) {
-          if (buses[i]["bearing"] === null) {
-            continue;
-          }
-
-          let latitude = buses[i]["latitude"];
-          let longitude = buses[i]["longitude"];
-          let bearing = buses[i]["bearing"];
-          let destination = buses[i]["destination_name"];
-          let line = buses[i]["published_line_name"];
-          let company = buses[i]["operator_ref"];
-
-          let bus_div_icon = L.divIcon({
-            className: "bus-icon",
-            html:
-              "<img src=" +
-              "arriva.png" +
-              ' width="50" height="50" style="transform: rotate(' +
-              (bearing - 90) +
-              'deg); ">',
-            iconSize: [50, 50],
-            iconAnchor: [25, 25],
-            popupAnchor: [0, -25],
-          });
-
-          var popup = L.popup()
-            .setLatLng([52.651133231174704, -1.2406078784788304])
-            .setContent(
-              "<div><h3>" +
-                line +
-                "</h3><p>destination: " +
-                destination +
-                "</p><p>bearing:" +
-                bearing +
-                "</p></div>"
-            );
-
-          L.marker([latitude, longitude], { icon: bus_div_icon })
-            .addTo(busLayer)
-            .bindPopup(popup);
-        }
-        busLayer.addTo(map);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData();
-    }, 5000);
+    console.log("displaying buses" + buses.length);
+    // TODO: add a expiry timer for buses that constantly return undefined for their bearing ( means they offline 90$ of the time) ~ 10 min / chance they are just waiting at bus station
+    // TODO: put that timer on the backend ^ frontend should display 'last seen' time
 
+    const updateBuses = () => {
+      if (map.getZoom() < 12) {
+        let renderer = L.canvas({ padding: 0.5 });
+        fetchData().then(() => {
+          busLayer.clearLayers();
+          for (let i = 0; i < buses.length; i++) {
+            if (buses[i]["bearing"] === null) {
+              continue;
+            }
+            let latitudedetail = buses[i]["latitude"];
+            let longitudedetail = buses[i]["longitude"];
+
+            let bus_canvas_icon = L.circleMarker(
+              [latitudedetail, longitudedetail],
+              {
+                renderer: renderer,
+                radius: 2,
+                color: "blue",
+              }
+            ).addTo(busLayer);
+          }
+          busLayer.addTo(map);
+        });
+      } else {
+        fetchData().then(() => {
+          busLayer.clearLayers();
+          for (let i = 0; i < buses.length; i++) {
+            if (buses[i]["bearing"] === null) {
+              continue;
+            }
+            let latitudedetail = buses[i]["latitude"];
+            let longitudedetail = buses[i]["longitude"];
+            let bearing = buses[i]["bearing"];
+            let destination = buses[i]["destination_name"];
+            let line = buses[i]["published_line_name"];
+            let company = buses[i]["operator_ref"];
+
+            let bus_div_icon = L.divIcon({
+              className: "bus-icon",
+              html:
+                "<img src=" +
+                "arriva.png" +
+                ' width="50" height="50" style="transform: rotate(' +
+                (bearing - 90) +
+                'deg); ">',
+              iconSize: [50, 50],
+              iconAnchor: [25, 25],
+              popupAnchor: [0, -25],
+            });
+
+            var popup = L.popup()
+              .setLatLng([52.651133231174704, -1.2406078784788304])
+              .setContent(
+                "<div><h3>" +
+                  line +
+                  "</h3><p>destination: " +
+                  destination +
+                  "</p><p>bearing:" +
+                  bearing +
+                  "</p></div>"
+              );
+
+            L.marker([latitudedetail, longitudedetail], { icon: bus_div_icon })
+              .addTo(busLayer)
+              .bindPopup(popup);
+          }
+          busLayer.addTo(map);
+        });
+      }
+    };
+
+    updateBuses();
+    socket.on("update_buses", updateBuses);
+    map.on("moveend", updateBuses);
     return () => {
-      clearInterval(interval);
       map.off();
       map.remove();
     };
