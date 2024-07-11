@@ -41,6 +41,7 @@ function Map() {
         ></script>
       </head>
       <div id="map"></div>
+      <BusLayer mapRef={mapRef} />
     </div>
   );
 }
