@@ -3,3 +3,6 @@
 /backend/app/__pycache__
 .env
 *.pyc
+*.xml
+/backend/timetable_data
+backend/catalogue.zip
