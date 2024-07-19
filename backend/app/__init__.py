@@ -24,6 +24,8 @@ def create_app():
     logger.getLogger(__name__)
     logger.basicConfig(level=logger.INFO)
 
+    populate_database_data(db)
+
     def populate_database_wrapper():
         populate_buses(db, server)
 
