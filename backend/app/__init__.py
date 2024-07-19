@@ -3,7 +3,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from db.database_connection import DatabaseConnection
-from db.database_utils import setup_database, populate_database
 from db.database_utils import populate_buses, populate_database_data
 from .routes import setup_routes
 
