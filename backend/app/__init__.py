@@ -26,7 +26,6 @@ def create_app():
     logger.basicConfig(level=logger.INFO)
 
     def populate_database_wrapper():
-        populate_database(db, server)
         populate_buses(db, server)
 
     logger.info("Starting scheduler")

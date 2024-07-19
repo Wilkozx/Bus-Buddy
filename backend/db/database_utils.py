@@ -10,13 +10,9 @@ import logging as logger
 from flask_socketio import SocketIO
 
 
-def setup_database(db):
-    # function for later use with getting datasets to populate the database everyday at 06:00 or on startup.
-    return
 def populate_database_data(db):
 
 
-def populate_database(db, server):
 def populate_buses(db, server):
     logger.getLogger(__name__)
     load_dotenv()
