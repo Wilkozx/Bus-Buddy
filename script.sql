@@ -1,3 +1,9 @@
+CREATE TABLE IF NOT EXISTS bus_stops (
+  stop_point_ref VARCHAR(255) UNIQUE NOT NULL,
+  CommonName VARCHAR(255),
+  Latitude FLOAT,
+  Longitude FLOAT
+);
 CREATE TABLE IF NOT EXISTS buses (
   id SERIAL PRIMARY KEY,
   VehicleUniqueId VARCHAR(255),
