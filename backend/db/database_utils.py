@@ -1,16 +1,57 @@
-# Create a bus table containing an id,
-from flask import jsonify
 import requests
 import xmltodict
 import os
 from dotenv import load_dotenv
-from db.database_connection import DatabaseConnection
 import logging as logger
-
-from flask_socketio import SocketIO
+import zipfile
+import urllib.request
 
 
 def populate_database_data(db):
+    if not os.path.exists('timetable_data'):
+        get_dataset_from_api()
+    else:
+        logger.info("Timetable data already exists")
+
+
+def get_dataset_from_api():
+    try:
+        url = "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive/EM"
+        filename = "catalogue.zip"
+        logger.info("Retrieving timetable data")
+        response = urllib.request.urlretrieve(url, filename)
+        logger.info("Timetable Data retrieved, parsing...")
+
+        with zipfile.ZipFile(filename, 'r') as zip_ref:
+            zip_ref.extractall("timetable_data")
+
+        unzip_recursive("timetable_data")
+
+        i = 0
+        for file in os.listdir("timetable_data"):
+            for file2 in os.listdir("timetable_data/" + file):
+                if file2.endswith(".xml"):
+                    i += 1
+        logger.info(f"Found {i} xml files in timetable data")
+    finally:
+        logger.info("Timetable Data retrieved")
+        os.remove(filename)
+
+
+def unzip_recursive(directory):
+    for item in os.listdir(directory):
+        item_path = os.path.join(directory, item)
+
+        if os.path.isdir(item_path):
+            unzip_recursive(item_path)
+
+        elif item_path.endswith(".zip"):
+            with zipfile.ZipFile(item_path, 'r') as zip_ref:
+                zip_ref.extractall(directory)
+                os.remove(item_path)
+                logger.info(f"Unzipped {item_path}")
+
+
 
 
 def populate_buses(db, server):
