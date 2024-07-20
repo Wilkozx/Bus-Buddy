@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS bus_stop_links (
+  id VARCHAR(255) UNIQUE NOT NULL,
+  from_stop VARCHAR(255),
+  to_stop VARCHAR(255),
+  FOREIGN KEY (from_stop) REFERENCES bus_stops(stop_point_ref),
+  FOREIGN KEY (to_stop) REFERENCES bus_stops(stop_point_ref)
+);
 CREATE TABLE IF NOT EXISTS bus_stops (
   stop_point_ref VARCHAR(255) UNIQUE NOT NULL,
   CommonName VARCHAR(255),
