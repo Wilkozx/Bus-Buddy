@@ -12,6 +12,11 @@ def populate_database_data(db):
         get_dataset_from_api()
     else:
         logger.info("Timetable data already exists")
+    count = db.execute_query("SELECT COUNT(*) FROM bus_stops")
+    if count[0][0] == 0:
+        populate_bus_stops(db)
+    else:
+        logger.info("Bus Stops already exist in database")
 
 
 def get_dataset_from_api():
@@ -50,6 +55,56 @@ def unzip_recursive(directory):
                 zip_ref.extractall(directory)
                 os.remove(item_path)
                 logger.info(f"Unzipped {item_path}")
+
+
+def populate_bus_stops(db):
+    try:
+        logger.info("Inserting Bus Stops into database")
+        unique_bus_stop_references = set()
+        for directory in os.listdir("timetable_data/"):
+            full_directory_path = os.path.join("timetable_data/", directory)
+            if (os.path.isdir(full_directory_path)):
+                for file in os.listdir(full_directory_path):
+                    full_file_path = os.path.join(full_directory_path, file)
+                    if (file.endswith(".xml")):
+                        with open(full_file_path, 'r') as f:
+                            data = xmltodict.parse(f.read())
+                            try:
+                                stopPoints = data["TransXChange"]["StopPoints"]["AnnotatedStopPointRef"]
+                                bus_stops = []
+                                for stop in stopPoints:
+                                    commonName = stop["CommonName"]
+                                    stopPointRef = stop["StopPointRef"]
+
+                                    if ("Location" in stop):
+                                        latitude = stop["Location"]["Latitude"]
+                                        longitude = stop["Location"]["Longitude"]
+                                    else:
+                                        latitude = None
+                                        longitude = None
+
+                                    if stopPointRef not in unique_bus_stop_references:
+                                        unique_bus_stop_references.add(
+                                            stopPointRef)
+                                        bus_stops.append(
+                                            (commonName, stopPointRef, latitude, longitude))
+
+                                if bus_stops:
+                                    try:
+                                        cursor = db.connection.cursor()
+                                        cursor.executemany(
+                                            "INSERT INTO bus_stops (commonname, stop_point_ref, latitude, longitude) VALUES (%s, %s, %s, %s)", bus_stops)
+                                        db.connection.commit()
+                                    except Exception as e:
+                                        logger.error(
+                                            "Unable to insert data to database / " + str(e))
+                                        return
+                            except Exception as e:
+                                logger.error("Unable to insert file " +
+                                             full_file_path + " to database / " + str(e))
+                                return
+    finally:
+        logger.info("All Bus Stops have been inserted into database")
 
 
 
